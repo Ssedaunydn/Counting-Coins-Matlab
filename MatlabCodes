@@ -1,0 +1,39 @@
+imageorj=imread('coins.jpeg'); %Read to image
+figure(1),imshow(imageorj);
+size(imageorj)
+image=0.2989*imageorj(:,:,1) + 0.5870*imageorj(:,:,2) + 0.1140*imageorj(:,:,3);
+level=graythresh(image);
+bw=im2bw(image,level);
+figure(2),imshow(bw);
+
+bw=imcomplement(bw); %Added negativity to the image
+figure(3),imshow(bw)
+bw=imfill(bw,'holes');%The places described as pits in the picture were filled.
+bw = bwareaopen(bw,30);%Objects less than 30px removed
+figure(4),imshow(bw);
+
+se=strel('disk',11); %Disc shaped structural element with radius of 11px created
+bw2=imerode(bw,se); %United coins are separated.
+figure(5),imshow(bw2);
+
+[B,L] = bwboundaries(bw2);  % Coins count learned by length(B)and label assigned.
+stats = regionprops(bw2,'Area','Centroid');
+figure(6),imshow(imageorj);
+    toplam = 0;
+    for n=1:length(B)
+        a=stats(n).Area;  % Learn each area. Calculated acorrding to dimensions.
+        centroid=stats(n).Centroid;
+                 if a> 30000
+                 toplam = toplam + 1;
+                 text(centroid(1),centroid(2),'1TL');
+            elseif a >23000 &&  a < 27000
+                toplam = toplam + 0.5;
+                text(centroid(1),centroid(2),'50Kr');
+            else
+                toplam = toplam + 0.25;
+                text(centroid(1),centroid(2),'25Kr');
+            
+        end
+    end
+    
+     title(['Total Coins are = ',num2str(toplam),' TL'])
